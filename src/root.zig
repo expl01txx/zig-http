@@ -57,7 +57,7 @@ pub const HttpServer = struct {
                 const error_payload =
                     \\HTTP/1.1 200 OK
                     \\Content-Type: text/html; charset=utf-8
-                    \\Connection: close
+                    \\Connection: keep-alive
                     \\
                     \\<!doctype html><h1>Page not found!</h1>
                 ;
@@ -70,24 +70,15 @@ pub const HttpServer = struct {
             const payload =
                 \\HTTP/1.1 200 OK
                 \\Content-Type: text/html; charset=utf-8
-                \\Connection: close
+                \\Connection: keep-alive
                 \\
                 \\
             ;
 
             const response = handler.?();
 
-            var buffer = std.ArrayList(u8).init(self.alloc);
-            defer buffer.deinit();
-
-            const writer = buffer.writer();
-
-            try writer.writeAll(payload);
-            try writer.writeAll(response);
-
-            write(socket, buffer.items) catch |err| {
-                std.debug.print("Failed to send data: {}\n", .{err});
-            };
+            try write(socket, payload);
+            try write(socket, response);
         }
     }
 
